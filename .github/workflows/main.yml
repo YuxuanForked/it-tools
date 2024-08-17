@@ -13,17 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js 16.x
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18.17.1
-        cache: 'npm'
+        node-version: 20
+        cache: 'pnpm'
     - name: Install dependencies
-      run: yarn install
-    - run: yarn run build
-    - run: ls -l
+      run: pnpm i
+    - run: pnpm build
     - run: zip -r dist.zip ./dist/
-    - run: ls -l
     # 上传部署
     - name: scp ssh pipelines
       uses: cross-the-world/ssh-scp-ssh-pipelines@latest
