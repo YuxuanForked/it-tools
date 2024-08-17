@@ -8,36 +8,34 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    # 运行环境
+ ci:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - run: corepack enable
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        cache: 'npm'
-    - name: Install dependencies
-      run: yarn install
-    - run: yarn run build
-    - run: zip -r dist.zip ./dist/
-    # 上传部署
-    - name: scp ssh pipelines
-      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
-      env:
-        LASTSSH: "Doing something after copying"
-      with:
-        host: ${{ secrets.YUXUAN_MAIN_SERVER_IP }}
-        user: ${{ secrets.YUXUAN_MAIN_SERVER_USER }}
-        pass: ${{ secrets.YUXUAN_MAIN_SERVER_PASS }}
-        scp: |
-          ./dist.zip => /mnt/project/web/utils
-        last_ssh: |
-          echo $LASTSSH 
-          cd /mnt/project/web/utils
-          unzip -o dist.zip
-          rm -rf dist.zip
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
+      - run: corepack enable
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm i
+      - run: pnpm build
+      - run: zip -r dist.zip ./dist/
+      # 上传部署
+      - name: scp ssh pipelines
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        env:
+          LASTSSH: "Doing something after copying"
+        with:
+          host: ${{ secrets.YUXUAN_MAIN_SERVER_IP }}
+          user: ${{ secrets.YUXUAN_MAIN_SERVER_USER }}
+          pass: ${{ secrets.YUXUAN_MAIN_SERVER_PASS }}
+          scp: |
+            ./dist.zip => /mnt/project/web/utils
+          last_ssh: |
+            echo $LASTSSH 
+            cd /mnt/project/web/utils
+            unzip -o dist.zip
+            rm -rf dist.zip
           
           
