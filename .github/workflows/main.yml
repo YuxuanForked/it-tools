@@ -1,0 +1,44 @@
+# 项目名称
+name: Build&Push
+
+on:
+  workflow_dispatch:
+  # 代码推送到master分支触发
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # 运行环境
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.17.1
+        cache: 'npm'
+    - name: Install dependencies
+      run: yarn install
+    - run: yarn run build
+    - run: ls -l
+    - run: zip -r dist.zip ./dist/
+    - run: ls -l
+    # 上传部署
+    - name: scp ssh pipelines
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      env:
+        LASTSSH: "Doing something after copying"
+      with:
+        host: ${{ secrets.YUXUAN_MAIN_SERVER_IP }}
+        user: ${{ secrets.YUXUAN_MAIN_SERVER_USER }}
+        pass: ${{ secrets.YUXUAN_MAIN_SERVER_PASS }}
+        scp: |
+          ./dist.zip => /mnt/project/web/utils
+        last_ssh: |
+          echo $LASTSSH 
+          cd /mnt/project/web/utils
+          unzip -o dist.zip
+          rm -rf dist.zip
+          
+          
